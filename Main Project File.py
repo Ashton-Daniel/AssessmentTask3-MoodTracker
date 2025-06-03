@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS moods (
     user_id INTEGER NOT NULL,
     emotion_strength INTEGER NOT NULL,
     mood_quality INTEGER NOT NULL,
+    selected_emotion TEXT NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 )
@@ -109,29 +110,29 @@ def Log_New_Mood():
     button_Q3.pack(pady=10)
 
 # Store mood entry in SQL database
-def log_mood(user_id, emotion_strength, mood_quality):
+def log_mood(user_id, emotion_strength, mood_quality, selected_emotion):
     conn = sqlite3.connect("mood_tracker.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO moods (user_id, emotion_strength, mood_quality) VALUES (?, ?, ?)", 
-                   (user_id, emotion_strength, mood_quality))
+    cursor.execute("INSERT INTO moods (user_id, emotion_strength, mood_quality, selected_emotion) VALUES (?, ?, ?, ?)", 
+                   (user_id, emotion_strength, mood_quality, selected_emotion))
     conn.commit()
     conn.close()
 
 def Question3(Q1, Q2):
+    global emotion_strength, mood_quality
     emotion_strength = Q1.get()
     mood_quality = Q2.get()
     
-    if user_id is not None:
-        log_mood(user_id, emotion_strength, mood_quality)
-
     reset()
+
     colour_table()
+    
 
 # Retrieve mood history from SQL database
 def get_mood_history(user_id):
     conn = sqlite3.connect("mood_tracker.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT emotion_strength, mood_quality, timestamp FROM moods WHERE user_id=? ORDER BY timestamp DESC", (user_id,))
+    cursor.execute("SELECT emotion_strength, mood_quality, selected_emotion, timestamp FROM moods WHERE user_id=? ORDER BY timestamp DESC", (user_id,))
     moods = cursor.fetchall()
     conn.close()
     return moods
@@ -139,18 +140,40 @@ def get_mood_history(user_id):
 # Display mood history
 def Mood_History():
     reset()
-    scrollable_frame2 = ctk.CTkScrollableFrame(app, width=500, height=300)
-    scrollable_frame2.pack(pady=20, padx=20, fill="both", expand=True)
 
+    # Create scrollable frame for the mood history table
+    scrollable_frame = ctk.CTkScrollableFrame(app, width=600, height=400)
+    scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+    # Define column headers
+    headers = ["Emotion Strength", "Mood Quality", "Final Emotion", "Date"]
+    for col, header in enumerate(headers):
+        header_label = ctk.CTkLabel(scrollable_frame, text=header, font=("Arial", 16, "bold"))
+        header_label.grid(row=0, column=col, padx=10, pady=5)
+
+    # Retrieve mood history data from the database
     history = get_mood_history(user_id)
-    for entry in history:
-        ctk.CTkLabel(scrollable_frame2, text=f"Emotion Strength: {entry[0]}, Mood Quality: {entry[1]}, Date: {entry[2]}", font=("Arial", 16)).pack(pady=5, padx=10)
+
+    # Populate rows with mood data
+    for row, entry in enumerate(history, start=1):
+        for col, data in enumerate(entry):
+            data_label = ctk.CTkLabel(scrollable_frame, text=str(data), font=("Arial", 14))
+            data_label.grid(row=row, column=col, padx=10, pady=5)
+
+    # Add a return button to go back to the main menu
+    button_back = ctk.CTkButton(app, text="Back to Menu", command=submit)
+    button_back.pack(pady=10)
 
 # Create colour table for emotions
 def on_cell_click(row, col, cell_number):
+    global emotion_strength, mood_quality
     selected_cell = [row, col]
     print(f"Cell {selected_cell} selected")
-    print(f"Emotion Selected: {Emotions[cell_number-1]}")
+    selected_emotion = Emotions[cell_number-1]
+    print(f"Emotion Selected: {selected_emotion}")
+    if user_id is not None:
+        log_mood(user_id, emotion_strength, mood_quality, selected_emotion)
+    submit()
 
 def colour_table():
     scrollable_frame = ctk.CTkScrollableFrame(app, width=500, height=300)
