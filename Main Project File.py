@@ -122,11 +122,22 @@ def Question3(Q1, Q2):
     global emotion_strength, mood_quality
     emotion_strength = Q1.get()
     mood_quality = Q2.get()
+    try:
+        emotion_strength = int(emotion_strength)
+        if emotion_strength > 10 or emotion_strength < 0:
+            emotion_strength = "error"
+    except:
+        emotion_strength = "error"
+
+    try:
+        mood_quality = int(mood_quality)
+        if mood_quality > 10 or mood_quality < 0:
+            mood_quality = "error"
+    except:
+        mood_quality = "error"
     
     reset()
-
     colour_table()
-    
 
 # Retrieve mood history from SQL database
 def get_mood_history(user_id):
