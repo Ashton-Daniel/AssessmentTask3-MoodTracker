@@ -1,5 +1,9 @@
 import customtkinter as ctk
 import sqlite3
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import datetime
+import tkinter as tk
 
 # Set up SQLite database
 conn = sqlite3.connect("mood_tracker.db")
@@ -148,6 +152,57 @@ def get_mood_history(user_id):
     conn.close()
     return moods
 
+
+def show_chart():
+    reset()
+
+    moods = get_mood_history(user_id)
+    if not moods:
+        ctk.CTkLabel(app, text="No mood data available to display.", text_color="red").pack(pady=20)
+        ctk.CTkButton(app, text="Back to Mood History", command=Mood_History).pack(pady=10)
+        return
+
+
+
+
+    # Prepare and filter clean numeric data
+    filtered_data = [
+    (int(entry[0]), int(entry[1]))
+    for entry in reversed(moods)
+    if isinstance(entry[0], int) and isinstance(entry[1], int)
+    ]
+
+    if not filtered_data:
+        ctk.CTkLabel(app, text="No valid mood data to display.", text_color="red").pack(pady=20)
+        return
+
+    emotion_strength = [e[0] for e in filtered_data]
+    mood_quality = [e[1] for e in filtered_data]
+    record_indices = list(range(1, len(filtered_data) + 1))
+
+    # Create plot
+    fig = Figure(figsize=(7, 4), dpi=100)
+    ax = fig.add_subplot(111)
+    ax.plot(record_indices, emotion_strength, label="Emotion Strength", color='red', marker='o')
+    ax.plot(record_indices, mood_quality, label="Mood Quality", color='blue', marker='x')
+    ax.set_xticks(record_indices)
+
+    ax.set_title("Mood Trends")
+    ax.set_xlabel("Entry Number")
+    ax.set_ylabel("Mood Scale (0–10)")
+    ax.set_ylim(0, 10)
+    ax.set_yticks(range(0, 11))
+    ax.legend()
+    ax.grid(True)
+
+    native_frame = tk.Frame(master=app)
+    native_frame.pack(pady=20, fill="both", expand=True)
+    chart_canvas = FigureCanvasTkAgg(fig, master=native_frame)
+    chart_canvas.draw()
+    chart_canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    ctk.CTkButton(app, text="Back to Mood History", command=Mood_History).pack(pady=10)
+
 # Display mood history
 def Mood_History():
     reset()
@@ -170,6 +225,9 @@ def Mood_History():
         for col, data in enumerate(entry):
             data_label = ctk.CTkLabel(scrollable_frame, text=str(data), font=("Arial", 14))
             data_label.grid(row=row, column=col, padx=10, pady=5)
+
+    button_charts = ctk.CTkButton(app, text="View Mood Chart", command=show_chart)
+    button_charts.pack(pady=10)
 
     # Add a return button to go back to the main menu
     button_back = ctk.CTkButton(app, text="Back to Menu", command=submit)
@@ -221,7 +279,7 @@ Emotions = [
             "Inferior", "Hopeless", "Depressed", "Down", "Tired", "Content", "Grateful", "",
             "", "Despair", "Gloomy", "Lost", "Complacent", "Loving", "Peaceful", "",
             "", "", "Empty", "", "Sleepy", "Fulfilled", "", "Tranquil",
-            ] * 64  # Adjusted to match original positioning
+            ]
 
 # Set up the first page
 ctk.set_appearance_mode("light")
