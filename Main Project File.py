@@ -2,7 +2,6 @@ import customtkinter as ctk
 import sqlite3
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import datetime
 import tkinter as tk
 
 # Set up SQLite database
@@ -99,13 +98,13 @@ def submit():
 # Log new mood entry
 def Log_New_Mood():
     reset()
-
-    label_question1 = ctk.CTkLabel(app, text="1. On a scale from 1-10, how powerful is the emotion you are currently feeling?")
+    global emotion_strength, mood_quality
+    label_question1 = ctk.CTkLabel(app, text="1. On a scale from 0-10, how powerful is the emotion you are currently feeling?")
     label_question1.pack(pady=(20, 5))
     entry_question1 = ctk.CTkEntry(app)
     entry_question1.pack(pady=5)
 
-    label_question2 = ctk.CTkLabel(app, text="2. On a scale from 1-10, how good do you feel?")
+    label_question2 = ctk.CTkLabel(app, text="2. On a scale from 0-10, how good do you feel?")
     label_question2.pack(pady=(20, 5))
     entry_question2 = ctk.CTkEntry(app)
     entry_question2.pack(pady=5)
@@ -124,22 +123,33 @@ def log_mood(user_id, emotion_strength, mood_quality, selected_emotion):
 
 def Question3(Q1, Q2):
     global emotion_strength, mood_quality
+
+    # Remove previous error labels before creating a new one
+    for widget in app.winfo_children():
+        if isinstance(widget, ctk.CTkLabel) and "Please enter" in str(widget.cget("text")):
+            widget.destroy()
+
     emotion_strength = Q1.get()
     mood_quality = Q2.get()
+
     try:
         emotion_strength = int(emotion_strength)
         if emotion_strength > 10 or emotion_strength < 0:
-            emotion_strength = "error"
+            raise ValueError
     except:
-        emotion_strength = "error"
+        label_error = ctk.CTkLabel(app, text="Please enter a valid number between 0–10 for emotion strength.", text_color="red")
+        label_error.pack(pady=10)
+        return
 
     try:
         mood_quality = int(mood_quality)
         if mood_quality > 10 or mood_quality < 0:
-            mood_quality = "error"
+            raise ValueError
     except:
-        mood_quality = "error"
-    
+        label_error = ctk.CTkLabel(app, text="Please enter a valid number between 0–10 for mood quality.", text_color="red")
+        label_error.pack(pady=10)
+        return
+
     reset()
     colour_table()
 
@@ -262,12 +272,16 @@ def colour_table():
             )
             btn.grid(row=row, column=col, padx=2, pady=2)
 
+# Define emotion strength, mood quality variables
+emotion_strength = None
+mood_quality = None
+
 # Define table size
 rows = 8
 cols = rows
 
 # Define colours from red to blue
-colours = ["#FF0000", "#FF4500", "#FF8C00", "#FFD700", "#32CD32", "#1E90FF", "#0000FF"]
+colours = ["#FF0000", "#FF8C00", "#32CD32", "#1E90FF", "#0000FF"]
 
 # Define emotions
 Emotions = [
