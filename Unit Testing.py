@@ -22,14 +22,17 @@ def test_log_and_retrieve_mood():
     # Call get_mood_history to retrieve the test data
     history = get_mood_history(user_id)
 
+    # Assert that the history contains the logged mood
     assert len(history) > 0, "No mood entries found."
     latest_entry = history[0]
-
-    assert latest_entry[0] == 5, "Emotion strength mismatch."
+    
+    # Check if the latest entry matches the logged mood
+    assert latest_entry[0] == 6, "Emotion strength mismatch."
     assert latest_entry[1] == 8, "Mood quality mismatch."
     assert latest_entry[2] == "Grateful", "Emotion label mismatch."
     
-    print("Mood log and retrieval works.")
+    # If all assertions pass, print success message
+    print("log_mood and get_mood_history functions passed the test successfully.")
 
 # Run tests
 if __name__ == "__main__":

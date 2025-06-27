@@ -319,57 +319,61 @@ def show_chart():
 
     # For each entry in moods, only include those with valid integer values
     for entry in reversed(moods)
-    
+
     # Check if both emotion_strength and mood_quality are integers
     if isinstance(entry[0], int) and isinstance(entry[1], int)
     ]
 
+    # If no valid mood data is found, display an error message
     if not filtered_data:
         ctk.CTkLabel(app, text="No valid mood data to display.", text_color="red").pack(pady=20)
         return
 
-    emotion_strength = [e[0] for e in filtered_data]
-    mood_quality = [e[1] for e in filtered_data]
-    record_indices = list(range(1, len(filtered_data) + 1))
+    # Extract emotion strength, mood quality, and record indices for plotting
+    emotion_strength = [e[0] for e in filtered_data] # Set Emotion strength to the first element of each entry
+    mood_quality = [e[1] for e in filtered_data] # Set Mood Quality to the second element of each entry
+    record_indices = list(range(1, len(filtered_data) + 1)) # Create a list of record indices starting from 1 and ending at the length of filtered_data
 
-    # Create plot
+    # Create plot using Matplotlib
+    # Create a new figure and axis for the plot
     fig = Figure(figsize=(7, 4), dpi=100)
     ax = fig.add_subplot(111)
+    # Plot emotion strength and mood quality on the same axis(The y-axis)
     ax.plot(record_indices, emotion_strength, label="Emotion Strength", color='red', marker='o')
     ax.plot(record_indices, mood_quality, label="Mood Quality", color='blue', marker='x')
+    # Set the x-axis ticks to the record indices
     ax.set_xticks(record_indices)
-
+    # Add labels and title to the plot
     ax.set_title("Mood Trends")
     ax.set_xlabel("Entry Number")
     ax.set_ylabel("Mood Scale (0–10)")
+    # Set the y-axis limits and ticks
     ax.set_ylim(0, 10)
     ax.set_yticks(range(0, 11))
+    # Add a legend to the plot
     ax.legend()
+    # Add grid lines to the plot for better readability
     ax.grid(True)
 
+    # Create a canvas to display the plot in the Tkinter window
     native_frame = tk.Frame(master=app)
     native_frame.pack(pady=20, fill="both", expand=True)
     chart_canvas = FigureCanvasTkAgg(fig, master=native_frame)
     chart_canvas.draw()
     chart_canvas.get_tk_widget().pack(fill="both", expand=True)
 
+    # Add a button to return to the mood history
     ctk.CTkButton(app, text="Back to Mood History", command=Mood_History).pack(pady=10)
 
-
-
-
-
-
-
-# Define table size
+# Define size of the colour table
 rows = 8
 cols = rows
 
-# Define colours
+# Define colours for the colour table
 colours = ["#FF0000", "#FF8C00", "#32CD32", "#1E90FF", "#0000FF"]
 
 # Create a list of emotions
-# Need to fill this list with emotions
+# --------Need to complete this list--------
 Emotions = [
             "", "", "", "", "Elated", "Exhilirated", "Inspired", "",
             "", "Enraged", "Irritated", "Agitated", "Bubbly", "Optimistic", "", "",
