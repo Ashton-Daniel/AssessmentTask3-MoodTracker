@@ -116,8 +116,8 @@ def submit():
     reset()
 
     # Create main menu label
-    test3_label = ctk.CTkLabel(app, text="Mood Tracker")
-    test3_label.pack(pady=50)
+    menu_label = ctk.CTkLabel(app, text="Main Menu", font=("Arial", 24, "bold"))
+    menu_label.pack(pady=50)
 
     # Main Menu Buttons
     button_log_mood = ctk.CTkButton(app, text="Log New Mood", command=Log_New_Mood)
@@ -388,7 +388,7 @@ Emotions = [
 # Set up the first page
 ctk.set_appearance_mode("light")
 app = ctk.CTk()
-app.title("Login Page")
+app.title("Mood Tracker")
 app.geometry("1200x800")
 
 login_page()
